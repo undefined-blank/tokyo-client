@@ -1,52 +1,50 @@
-import useMetamask from "../hooks/useMetamask";
-import { formatChainAsNum } from "../utils/formmatter";
+import { providers } from 'ethers';
+import { useState } from 'react';
 
 const Home = () => {
-  const {
-    hasProvider,
-    wallet,
-    disableConnect,
-    handleConnect,
-    error,
-    errorMessage,
-    setError,
-  } = useMetamask();
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  let provider: providers.Web3Provider;
+
+  // 메마 지갑 연결
+  const connectToMetaMask = async () => {
+    // 메타마스크 설치 확인
+    if (typeof window.ethereum !== 'undefined') {
+      // 메타마스크가 있을 시 지갑연결 요청
+      provider = await new providers.Web3Provider(window.ethereum);
+      const walletAddress = await provider.send('eth_requestAccounts', []);
+      console.log('connected to ', walletAddress);
+
+      // 성공하면 여기에 상태변수 바꾸기
+      setIsConnecting(true);
+    } else {
+      alert('please install MetaMask');
+    }
+  };
 
   return (
     <div className="w-full flex flex-col justify-center items-center p-8 gap-4">
       <h1 className="font-bold text-4xl">UNDEFINED TOKYO</h1>
 
-      {!hasProvider && <p>Please Install Metamask.</p>}
+      {!isConnecting && <p>Please Install Metamask.</p>}
 
-      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
+      {!isConnecting && (
         <button
           className="flex items-center gap-2 border border-gray-600 rounded p-2 text-gray-700 hover:bg-gray-100"
-          onClick={handleConnect}
-          disabled={disableConnect}
+          onClick={async () => {
+            await connectToMetaMask();
+          }}
         >
-          <img
-            className="w-8 h-8"
-            src={
-              "https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
-            }
-          />
+          <img className="w-8 h-8" src={'https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg'} />
           <p className="text-lg">Connect MetaMask</p>
         </button>
       )}
 
-      {wallet.accounts.length > 0 && (
+      {isConnecting && (
         <>
-          <div>Wallet Accounts: {wallet.accounts[0]}</div>
-          <div>Wallet Balance: {wallet.balance}</div>
-          <div>Hex ChainId: {wallet.chainId}</div>
-          <div>Numeric ChainId: {formatChainAsNum(wallet.chainId)}</div>
+          {/* <div>Wallet Accounts: {wallet.accounts[0]}</div>
+          <div>Wallet Balance: {wallet.balance}</div> */}
         </>
-      )}
-
-      {error && (
-        <div onClick={() => setError(false)}>
-          <strong>Error:</strong> {errorMessage}
-        </div>
       )}
     </div>
   );
