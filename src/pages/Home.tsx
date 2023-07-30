@@ -6,6 +6,7 @@ const Home = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [walletAddress, setWalletAddress] = useState<null | string>(null);
   const [walletBalance, setWalletBalance] = useState<null | string>(null);
+  const navigate = useNavigate();
 
   let provider: providers.Web3Provider;
   let contractWithSigner: Contract;
@@ -33,8 +34,9 @@ const Home = () => {
       contractWithSigner = await betContract?.connect(signer);
       console.log(contractWithSigner);
 
-      // 성공하면 UI 변경
+      // 성공하면 여기에 상태변수 바꾸기
       setIsConnecting(true);
+      navigate('/form');
     } else {
       alert('please install MetaMask');
     }
