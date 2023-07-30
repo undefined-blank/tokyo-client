@@ -1,55 +1,64 @@
-import useMetamask from "../hooks/useMetamask";
-import { formatChainAsNum } from "../utils/formmatter";
+import { providers } from "ethers";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 const Home = () => {
-  const {
-    hasProvider,
-    wallet,
-    disableConnect,
-    handleConnect,
-    error,
-    errorMessage,
-    setError,
-  } = useMetamask();
+    const [isConnecting, setIsConnecting] = useState(false);
+    const navigate = useNavigate();
 
-  return (
-    <div className="w-full flex flex-col justify-center items-center p-8 gap-4">
-      <h1 className="font-bold text-4xl">UNDEFINED TOKYO</h1>
+    let provider: providers.Web3Provider;
 
-      {!hasProvider && <p>Please Install Metamask.</p>}
+    // 메마 지갑 연결
+    const connectToMetaMask = async () => {
+        // 메타마스크 설치 확인
+        if (typeof window.ethereum !== "undefined") {
+            // 메타마스크가 있을 시 지갑연결 요청
+            provider = await new providers.Web3Provider(window.ethereum);
+            const walletAddress = await provider.send(
+                "eth_requestAccounts",
+                []
+            );
+            console.log("connected to ", walletAddress);
 
-      {window.ethereum?.isMetaMask && wallet.accounts.length < 1 && (
-        <button
-          className="flex items-center gap-2 border border-gray-600 rounded p-2 text-gray-700 hover:bg-gray-100"
-          onClick={handleConnect}
-          disabled={disableConnect}
-        >
-          <img
-            className="w-8 h-8"
-            src={
-              "https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
-            }
-          />
-          <p className="text-lg">Connect MetaMask</p>
-        </button>
-      )}
+            // 성공하면 여기에 상태변수 바꾸기
+            setIsConnecting(true);
+            navigate("/form");
+        } else {
+            alert("please install MetaMask");
+        }
+    };
 
-      {wallet.accounts.length > 0 && (
-        <>
-          <div>Wallet Accounts: {wallet.accounts[0]}</div>
-          <div>Wallet Balance: {wallet.balance}</div>
-          <div>Hex ChainId: {wallet.chainId}</div>
-          <div>Numeric ChainId: {formatChainAsNum(wallet.chainId)}</div>
-        </>
-      )}
+    return (
+        <div className="w-full flex flex-col justify-center items-center p-8 gap-4">
+            <h1 className="font-bold text-4xl">UNDEFINED TOKYO</h1>
 
-      {error && (
-        <div onClick={() => setError(false)}>
-          <strong>Error:</strong> {errorMessage}
+            {!isConnecting && <p>Please Install Metamask.</p>}
+
+            {!isConnecting && (
+                <button
+                    className="flex items-center gap-2 border border-gray-600 rounded p-2 text-gray-700 hover:bg-gray-100"
+                    onClick={async () => {
+                        await connectToMetaMask();
+                    }}
+                >
+                    <img
+                        className="w-8 h-8"
+                        src={
+                            "https://upload.wikimedia.org/wikipedia/commons/3/36/MetaMask_Fox.svg"
+                        }
+                    />
+                    <p className="text-lg">Connect MetaMask</p>
+                </button>
+            )}
+
+            {isConnecting && (
+                <>
+                    {/* <div>Wallet Accounts: {wallet.accounts[0]}</div>
+          <div>Wallet Balance: {wallet.balance}</div> */}
+                </>
+            )}
         </div>
-      )}
-    </div>
-  );
+    );
 };
 
 export default Home;
