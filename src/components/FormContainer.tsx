@@ -1,66 +1,61 @@
-import React, { useState } from "react";
+import { useState } from "react";
 
-const FormContainer = () => {
-    const [meAddress, setMeAddress] = useState("");
-    const [battingPrize, setBattingPrize] = useState("");
-    const [WithAddress, setWithAddress] = useState("");
-    const [youAddress, setYouAddress] = useState("");
+interface Props {
+  handleGenerateBet: (args: string[]) => void;
+  disalbedSubmit?: boolean;
+}
 
-    const inputStyle = "w-52 h-6 border-2";
-    const labelStyle = "h-6 flex items-center";
+const FormContainer = ({ handleGenerateBet, disalbedSubmit }: Props) => {
+  const [battingAmount, setBattingAmount] = useState("");
+  const [withAddress, setWithAddress] = useState("");
+  const [opponent, setOpponentAddress] = useState("");
 
-    return (
-        <form>
-            <div className={labelStyle}>
-                <span className="w-20">Me</span>
-                <input
-                    className={inputStyle}
-                    type="text"
-                    readOnly
-                    value={meAddress}
-                    onChange={(e) => setMeAddress(e.target.value)}
-                />
-            </div>
-            <br />
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    handleGenerateBet([battingAmount, withAddress, opponent]);
+  };
 
-            <div className={labelStyle}>
-                <span className="w-20">Batting</span>
-                <input
-                    className={inputStyle}
-                    type="text"
-                    value={battingPrize}
-                    onChange={(e) => setBattingPrize(e.target.value)}
-                />
-            </div>
-            <br />
+  return (
+    <form className="flex flex-col gap-2 p-4" onSubmit={handleSubmit}>
+      <div className="flex">
+        <span className="w-32 text-gray-800">Bat Amount</span>
+        <input
+          className="flex-1 border rounded h-8 p-2"
+          type="text"
+          value={battingAmount}
+          onChange={(e) => setBattingAmount(e.target.value)}
+        />
+      </div>
 
-            <div className={labelStyle}>
-                <span className="w-20">Withness</span>
-                <input
-                    className={inputStyle}
-                    type="text"
-                    value={WithAddress}
-                    onChange={(e) => setWithAddress(e.target.value)}
-                />
-            </div>
-            <br />
+      <div className="flex">
+        <span className="w-32 text-gray-800">Withness</span>
+        <input
+          className="flex-1 border rounded h-8 p-2"
+          type="text"
+          value={withAddress}
+          onChange={(e) => setWithAddress(e.target.value)}
+        />
+      </div>
 
-            <div className={labelStyle}>
-                <span className="w-20">You</span>
-                <input
-                    className={inputStyle}
-                    type="text"
-                    value={youAddress}
-                    onChange={(e) => setYouAddress(e.target.value)}
-                />
-            </div>
-            <br />
+      <div className="flex">
+        <span className="w-32 text-gray-800">opponent</span>
+        <input
+          className="flex-1 border rounded h-8 p-2"
+          type="text"
+          value={opponent}
+          onChange={(e) => setOpponentAddress(e.target.value)}
+        />
+      </div>
 
-            <div className="flex justify-center">
-                <button type="submit">Generate</button>
-            </div>
-        </form>
-    );
+      <button
+        type="submit"
+        disabled={disalbedSubmit || !battingAmount || !withAddress || !opponent}
+        className="mt-8 border-2 border-gray-600 rounded p-2 hover:bg-gray-200"
+      >
+        Generate
+      </button>
+    </form>
+  );
 };
 
 export default FormContainer;
